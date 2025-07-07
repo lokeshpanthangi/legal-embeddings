@@ -7,34 +7,60 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Legal Professional Color System */
+    --background: 0 0% 99%;
+    --foreground: 220 80% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 80% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 80% 8%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Legal Navy Blue Primary */
+    --primary: 220 91% 20%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 220 91% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Professional Gold Accent */
+    --secondary: 43 96% 56%;
+    --secondary-foreground: 220 91% 20%;
+    --secondary-hover: 43 96% 50%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Subtle Gray Tones */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 14% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 91% 20%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status Colors for Document Types */
+    --income-tax: 217 91% 60%;
+    --gst: 142 71% 45%;
+    --court-judgment: 262 83% 58%;
+    --property-law: 25 95% 53%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* System Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 91% 20%;
+
+    /* Legal Professional Gradients */
+    --gradient-legal: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    --gradient-gold: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-hover)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+
+    /* Professional Shadows */
+    --shadow-legal: 0 10px 30px -10px hsl(var(--primary) / 0.1);
+    --shadow-gold: 0 4px 20px -4px hsl(var(--secondary) / 0.2);
+    --shadow-card: 0 2px 10px -2px hsl(var(--foreground) / 0.1);
+
+    /* Typography */
+    --font-legal: 'Playfair Display', 'Georgia', serif;
+    --font-body: 'Inter', system-ui, sans-serif;
 
     --radius: 0.5rem;
 

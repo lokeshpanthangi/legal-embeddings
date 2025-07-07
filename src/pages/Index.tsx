@@ -2,31 +2,95 @@ import { useState } from "react";
 import { SearchHeader } from "@/components/SearchHeader";
 import { ResultsGrid } from "@/components/ResultsGrid";
 import { MetricsPanel } from "@/components/MetricsPanel";
-import { sampleSearchResults, sampleMetrics } from "@/data/sampleData";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState(sampleSearchResults);
-  const [metrics, setMetrics] = useState(sampleMetrics);
+  const [searchResults, setSearchResults] = useState(null);
+  const [metrics, setMetrics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
     setHasSearched(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setSearchResults(sampleSearchResults);
-      setMetrics(sampleMetrics);
+    try {
+      const response = await fetch('http://localhost:3001/api/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setSearchResults(data.results);
+        setMetrics(data.metrics);
+        
+        toast({
+          title: "Search completed",
+          description: `Found results using 4 similarity algorithms`,
+        });
+      } else {
+        throw new Error(data.error || 'Search failed');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "Search failed",
+        description: error instanceof Error ? error.message : 'An error occurred during search',
+        variant: "destructive",
+      });
+      
+      // Reset state on error
+      setSearchResults(null);
+      setMetrics(null);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
-  const handleFileUpload = (file: File) => {
-    console.log("File uploaded:", file.name);
-    // Handle file upload logic here
+  const handleFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+      
+      const response = await fetch('http://localhost:3001/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Document uploaded successfully",
+          description: `${file.name} has been processed and indexed with all 4 similarity algorithms`,
+        });
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : 'An error occurred during upload',
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -65,11 +129,11 @@ const Index = () => {
       {hasSearched && (
         <>
           {/* Performance Metrics */}
-          <MetricsPanel metrics={metrics} isVisible={!isLoading} />
+          {metrics && <MetricsPanel metrics={metrics} isVisible={!isLoading} />}
           
           {/* Search Results Grid */}
           <ResultsGrid 
-            results={searchResults}
+            results={searchResults || { cosine: [], euclidean: [], mmr: [], hybrid: [] }}
             searchQuery={searchQuery}
             isLoading={isLoading}
           />

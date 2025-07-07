@@ -3,8 +3,6 @@ import { Search, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface SearchHeaderProps {
   onSearch: (query: string) => void;
@@ -15,7 +13,6 @@ interface SearchHeaderProps {
 export const SearchHeader = ({ onSearch, onFileUpload, isLoading = false }: SearchHeaderProps) => {
   const [query, setQuery] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -32,32 +29,9 @@ export const SearchHeader = ({ onSearch, onFileUpload, isLoading = false }: Sear
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
-      const filePath = `documents/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('legal-documents')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      toast({
-        title: "Document uploaded successfully",
-        description: `${file.name} has been uploaded and is ready for analysis.`,
-      });
-
-      // Call the original onFileUpload callback
-      onFileUpload(file);
+      await onFileUpload(file);
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast({
-        title: "Upload failed",
-        description: "There was an error uploading your document. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsUploading(false);
     }

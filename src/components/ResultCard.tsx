@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { DocumentViewer } from "@/components/DocumentViewer";
 
 interface ResultCardProps {
   result: {
@@ -46,6 +48,15 @@ const highlightSearchTerms = (text: string, query?: string) => {
 
 export const ResultCard = ({ result, searchQuery }: ResultCardProps) => {
   const relevancePercentage = Math.round(result.relevance * 100);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+
+  // Generate a mock document URL for demo purposes
+  // In a real implementation, this would come from the result data
+  const documentUrl = `https://hypbpytjmftxnkokutvt.supabase.co/storage/v1/object/public/legal-documents/sample-docs/sample-${result.id}.pdf`;
+
+  const handleViewDocument = () => {
+    setIsViewerOpen(true);
+  };
   
   return (
     <Card className="h-full hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary/20 hover:border-l-primary group">
@@ -84,10 +95,18 @@ export const ResultCard = ({ result, searchQuery }: ResultCardProps) => {
           variant="outline" 
           size="sm" 
           className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+          onClick={handleViewDocument}
         >
           View Full Document
         </Button>
       </CardContent>
+
+      <DocumentViewer
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        documentUrl={documentUrl}
+        documentTitle={result.title}
+      />
     </Card>
   );
 };

@@ -3,6 +3,8 @@ import { Search, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchHeaderProps {
   onSearch: (query: string) => void;
@@ -12,6 +14,8 @@ interface SearchHeaderProps {
 
 export const SearchHeader = ({ onSearch, onFileUpload, isLoading = false }: SearchHeaderProps) => {
   const [query, setQuery] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -22,6 +26,40 @@ export const SearchHeader = ({ onSearch, onFileUpload, isLoading = false }: Sear
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+      const filePath = `documents/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('legal-documents')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      toast({
+        title: "Document uploaded successfully",
+        description: `${file.name} has been uploaded and is ready for analysis.`,
+      });
+
+      // Call the original onFileUpload callback
+      onFileUpload(file);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -80,13 +118,14 @@ export const SearchHeader = ({ onSearch, onFileUpload, isLoading = false }: Sear
               <input
                 type="file"
                 accept=".pdf,.doc,.docx"
-                onChange={(e) => e.target.files?.[0] && onFileUpload(e.target.files[0])}
+                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                 className="hidden"
                 id="file-upload"
+                disabled={isUploading}
               />
               <label htmlFor="file-upload">
-                <Button variant="outline" asChild>
-                  <span>Upload PDF/Word Document</span>
+                <Button variant="outline" asChild disabled={isUploading}>
+                  <span>{isUploading ? "Uploading..." : "Upload PDF/Word Document"}</span>
                 </Button>
               </label>
             </div>
